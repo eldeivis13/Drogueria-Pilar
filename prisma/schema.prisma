@@ -1,0 +1,430 @@
+// ============================================================
+// DROGUERÍA PILAR — Prisma Schema
+// Base de datos: PostgreSQL
+// ORM: Prisma
+// ============================================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// ============================================================
+// ENUMS
+// ============================================================
+
+enum Role {
+  CUSTOMER
+  ADMIN
+}
+
+enum OrderStatus {
+  PENDING      // Pedido creado, esperando pago
+  PAID         // Pago confirmado
+  PROCESSING   // En preparación
+  SHIPPED      // Enviado
+  DELIVERED    // Entregado
+  CANCELLED    // Cancelado
+  REFUNDED     // Reembolsado
+}
+
+enum PaymentMethod {
+  CREDIT_CARD
+  DEBIT_CARD
+  BANK_TRANSFER
+  CASH_ON_DELIVERY
+  PSE              // Pago en línea Colombia
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  REFUNDED
+}
+
+// ============================================================
+// USER — Usuarios y autenticación
+// ============================================================
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  emailVerified DateTime?
+  passwordHash  String?
+  firstName     String
+  lastName      String
+  phone         String?
+  avatarUrl     String?
+  role          Role      @default(CUSTOMER)
+  isActive      Boolean   @default(true)
+
+  // Relaciones
+  addresses Address[]
+  orders    Order[]
+  cart      Cart?
+  reviews   Review[]
+  wishlist  WishlistItem[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("users")
+}
+
+// ============================================================
+// ADDRESS — Direcciones de envío
+// ============================================================
+
+model Address {
+  id           String  @id @default(cuid())
+  userId       String
+  label        String  @default("Casa") // "Casa", "Trabajo", etc.
+  firstName    String
+  lastName     String
+  street       String
+  neighborhood String?
+  city         String
+  department   String
+  postalCode   String?
+  phone        String
+  isDefault    Boolean @default(false)
+
+  // Relaciones
+  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  orders Order[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("addresses")
+}
+
+// ============================================================
+// CATEGORY — Categorías de productos
+// ============================================================
+
+model Category {
+  id          String  @id @default(cuid())
+  name        String
+  slug        String  @unique
+  description String?
+  icon        String? // Emoji o nombre de icono
+  imageUrl    String?
+  isActive    Boolean @default(true)
+  sortOrder   Int     @default(0)
+
+  // Auto-referencia para subcategorías
+  parentId    String?
+  parent      Category?  @relation("CategoryChildren", fields: [parentId], references: [id])
+  children    Category[] @relation("CategoryChildren")
+
+  // Relaciones
+  products Product[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("categories")
+}
+
+// ============================================================
+// PRODUCT — Productos del catálogo
+// ============================================================
+
+model Product {
+  id          String  @id @default(cuid())
+  name        String
+  slug        String  @unique
+  description String
+  shortDesc   String? // Descripción corta para cards
+  sku         String? @unique // Código de referencia interno
+  barcode     String? // Código de barras EAN/UPC
+
+  // Precios
+  price       Decimal @db.Decimal(12, 2)
+  salePrice   Decimal? @db.Decimal(12, 2) // Precio de oferta (null = sin oferta)
+
+  // Inventario
+  stock       Int     @default(0)
+  minStock    Int     @default(5)  // Alerta de stock bajo
+  trackStock  Boolean @default(true)
+
+  // Metadata
+  brand       String?
+  weight      Decimal? @db.Decimal(8, 3) // En gramos
+  isActive    Boolean  @default(true)
+  isFeatured  Boolean  @default(false)
+  requiresPrescription Boolean @default(false) // Medicamentos con receta
+
+  // SEO
+  metaTitle       String?
+  metaDescription String?
+
+  // Rating calculado (se actualiza con trigger o job)
+  ratingAvg   Float  @default(0)
+  ratingCount Int    @default(0)
+  salesCount  Int    @default(0)
+
+  // Relaciones
+  categoryId String
+  category   Category @relation(fields: [categoryId], references: [id])
+
+  images      ProductImage[]
+  reviews     Review[]
+  cartItems   CartItem[]
+  orderItems  OrderItem[]
+  wishlist    WishlistItem[]
+  tags        ProductTag[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([categoryId])
+  @@index([slug])
+  @@index([isActive, isFeatured])
+  @@map("products")
+}
+
+// ============================================================
+// PRODUCT IMAGE — Imágenes de productos
+// ============================================================
+
+model ProductImage {
+  id        String  @id @default(cuid())
+  productId String
+  url       String
+  altText   String?
+  sortOrder Int     @default(0)
+  isPrimary Boolean @default(false)
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@map("product_images")
+}
+
+// ============================================================
+// PRODUCT TAG — Etiquetas (nuevo, popular, oferta, etc.)
+// ============================================================
+
+model ProductTag {
+  id        String @id @default(cuid())
+  productId String
+  name      String // "nuevo", "popular", "oferta", "destacado"
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([productId, name])
+  @@map("product_tags")
+}
+
+// ============================================================
+// REVIEW — Reseñas y calificaciones
+// ============================================================
+
+model Review {
+  id        String  @id @default(cuid())
+  productId String
+  userId    String
+  rating    Int     // 1 a 5
+  title     String?
+  body      String?
+  isApproved Boolean @default(false) // Moderación
+
+  // Utilidad de la reseña
+  helpfulCount    Int @default(0)
+  notHelpfulCount Int @default(0)
+
+  // Relaciones
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Un usuario solo puede reseñar un producto una vez
+  @@unique([productId, userId])
+  @@index([productId, isApproved])
+  @@map("reviews")
+}
+
+// ============================================================
+// CART — Carrito de compras (uno por usuario)
+// ============================================================
+
+model Cart {
+  id     String @id @default(cuid())
+  userId String @unique
+
+  // Relaciones
+  user  User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items CartItem[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("carts")
+}
+
+// ============================================================
+// CART ITEM — Ítem dentro del carrito
+// ============================================================
+
+model CartItem {
+  id        String @id @default(cuid())
+  cartId    String
+  productId String
+  quantity  Int    @default(1)
+
+  // Precio en el momento de agregar (por si cambia)
+  priceSnapshot Decimal @db.Decimal(12, 2)
+
+  // Relaciones
+  cart    Cart    @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  addedAt   DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([cartId, productId])
+  @@map("cart_items")
+}
+
+// ============================================================
+// WISHLIST ITEM — Lista de deseos
+// ============================================================
+
+model WishlistItem {
+  id        String @id @default(cuid())
+  userId    String
+  productId String
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  addedAt DateTime @default(now())
+
+  @@unique([userId, productId])
+  @@map("wishlist_items")
+}
+
+// ============================================================
+// ORDER — Pedido completo
+// ============================================================
+
+model Order {
+  id     String @id @default(cuid())
+  userId String
+
+  // Número de orden legible para el cliente
+  orderNumber String @unique @default(cuid())
+
+  // Estado
+  status        OrderStatus   @default(PENDING)
+  paymentMethod PaymentMethod
+  paymentStatus PaymentStatus @default(PENDING)
+
+  // Totales
+  subtotal     Decimal  @db.Decimal(12, 2)
+  discountAmount Decimal @db.Decimal(12, 2) @default(0)
+  shippingCost Decimal  @db.Decimal(12, 2) @default(0)
+  total        Decimal  @db.Decimal(12, 2)
+
+  // Cupón aplicado
+  couponCode   String?
+  couponDiscount Decimal? @db.Decimal(12, 2)
+
+  // Dirección de envío (snapshot al momento del pedido)
+  shippingAddressId String?
+  shippingFirstName String
+  shippingLastName  String
+  shippingStreet    String
+  shippingCity      String
+  shippingDepartment String
+  shippingPhone     String
+  shippingPostalCode String?
+
+  // Notas
+  customerNotes String?
+  internalNotes String?
+
+  // Tracking
+  trackingCode    String?
+  estimatedDelivery DateTime?
+  deliveredAt     DateTime?
+
+  // Relaciones
+  user            User         @relation(fields: [userId], references: [id])
+  shippingAddress Address?     @relation(fields: [shippingAddressId], references: [id])
+  items           OrderItem[]
+  payment         Payment?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([status])
+  @@index([orderNumber])
+  @@map("orders")
+}
+
+// ============================================================
+// ORDER ITEM — Ítem dentro de un pedido
+// ============================================================
+
+model OrderItem {
+  id        String @id @default(cuid())
+  orderId   String
+  productId String
+
+  // Snapshot del producto al momento de comprar
+  productName  String
+  productBrand String?
+  productSku   String?
+  imageUrl     String?
+
+  quantity  Int
+  unitPrice Decimal @db.Decimal(12, 2) // Precio unitario al momento de compra
+  subtotal  Decimal @db.Decimal(12, 2) // quantity * unitPrice
+
+  // Relaciones
+  order   Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id])
+
+  @@map("order_items")
+}
+
+// ============================================================
+// PAYMENT — Registro de transacciones de pago
+// ============================================================
+
+model Payment {
+  id      String @id @default(cuid())
+  orderId String @unique
+
+  method        PaymentMethod
+  status        PaymentStatus @default(PENDING)
+  amount        Decimal       @db.Decimal(12, 2)
+
+  // Referencia externa (pasarela de pago)
+  gatewayRef    String? // ID de transacción en la pasarela
+  gatewayName   String? // "wompi", "mercadopago", etc.
+  gatewayResponse Json?  // Respuesta cruda de la pasarela
+
+  paidAt    DateTime?
+  failedAt  DateTime?
+
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("payments")
+}
