@@ -23,31 +23,34 @@ const SORT_OPTIONS = [
   { value: "price_desc", label: "Mayor precio" },
 ];
 
+interface SearchParamsShape {
+  categoria?: string;
+  q?: string;
+  oferta?: string;
+  destacado?: string;
+  sort?: string;
+  page?: string;
+  minPrice?: string;
+  maxPrice?: string;
+}
+
 interface Props {
-  searchParams: {
-    categoria?: string;
-    q?: string;
-    oferta?: string;
-    destacado?: string;
-    sort?: string;
-    page?: string;
-    minPrice?: string;
-    maxPrice?: string;
-  };
+  searchParams: Promise<SearchParamsShape>;
 }
 
 export default async function ProductosPage({ searchParams }: Props) {
-  const page = Number(searchParams.page ?? 1);
-  const sort = (searchParams.sort ?? "newest") as "newest" | "popular" | "rating" | "price_asc" | "price_desc";
+  const sp = await searchParams;
+  const page = Number(sp.page ?? 1);
+  const sort = (sp.sort ?? "newest") as "newest" | "popular" | "rating" | "price_asc" | "price_desc";
 
   const [{ items: products, total, totalPages }, categories] = await Promise.all([
     getProducts({
-      categorySlug: searchParams.categoria,
-      search: searchParams.q,
-      onSale: searchParams.oferta === "true",
-      featured: searchParams.destacado === "true",
-      minPrice: searchParams.minPrice ? Number(searchParams.minPrice) : undefined,
-      maxPrice: searchParams.maxPrice ? Number(searchParams.maxPrice) : undefined,
+      categorySlug: sp.categoria,
+      search: sp.q,
+      onSale: sp.oferta === "true",
+      featured: sp.destacado === "true",
+      minPrice: sp.minPrice ? Number(sp.minPrice) : undefined,
+      maxPrice: sp.maxPrice ? Number(sp.maxPrice) : undefined,
       sort,
       page,
       limit: 12,
@@ -55,11 +58,11 @@ export default async function ProductosPage({ searchParams }: Props) {
     getCategories(),
   ]);
 
-  const activeCategory = categories.find((c) => c.slug === searchParams.categoria);
+  const activeCategory = categories.find((c) => c.slug === sp.categoria);
 
   function buildUrl(params: Record<string, string | undefined>) {
     const current = {
-      ...searchParams,
+      ...sp,
       ...params,
     };
     const qs = Object.entries(current)
@@ -95,13 +98,13 @@ export default async function ProductosPage({ searchParams }: Props) {
                   <Link
                     href="/productos"
                     className={`w-full text-left text-sm px-2 py-1.5 rounded-lg flex justify-between items-center transition-colors ${
-                      !searchParams.categoria
+                      !sp.categoria
                         ? "bg-[#2D1B69] text-white font-medium"
                         : "text-gray-600 hover:bg-purple-50 hover:text-[#2D1B69]"
                     }`}
                   >
                     <span>Todas</span>
-                    <span className={!searchParams.categoria ? "text-purple-200" : "text-gray-400"}>
+                    <span className={!sp.categoria ? "text-purple-200" : "text-gray-400"}>
                       {total}
                     </span>
                   </Link>
@@ -111,7 +114,7 @@ export default async function ProductosPage({ searchParams }: Props) {
                     <Link
                       href={buildUrl({ categoria: cat.slug, page: "1" })}
                       className={`w-full text-left text-sm px-2 py-1.5 rounded-lg flex justify-between items-center transition-colors ${
-                        searchParams.categoria === cat.slug
+                        sp.categoria === cat.slug
                           ? "bg-[#2D1B69] text-white font-medium"
                           : "text-gray-600 hover:bg-purple-50 hover:text-[#2D1B69]"
                       }`}
@@ -120,7 +123,7 @@ export default async function ProductosPage({ searchParams }: Props) {
                         <span>{cat.icon}</span>
                         <span className="truncate">{cat.name}</span>
                       </span>
-                      <span className={searchParams.categoria === cat.slug ? "text-purple-200" : "text-gray-400"}>
+                      <span className={sp.categoria === cat.slug ? "text-purple-200" : "text-gray-400"}>
                         {cat._count.products}
                       </span>
                     </Link>
@@ -136,28 +139,28 @@ export default async function ProductosPage({ searchParams }: Props) {
               <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Filtros rápidos</p>
               <div className="space-y-1">
                 <Link
-                  href={buildUrl({ oferta: searchParams.oferta === "true" ? undefined : "true", page: "1" })}
+                  href={buildUrl({ oferta: sp.oferta === "true" ? undefined : "true", page: "1" })}
                   className={`flex items-center gap-2 text-sm px-2 py-1.5 rounded-lg transition-colors cursor-pointer ${
-                    searchParams.oferta === "true"
+                    sp.oferta === "true"
                       ? "bg-red-50 text-red-600 font-medium"
                       : "text-gray-600 hover:bg-red-50 hover:text-red-600"
                   }`}
                 >
                   🔥 En oferta
-                  {searchParams.oferta === "true" && (
+                  {sp.oferta === "true" && (
                     <Badge className="ml-auto bg-red-100 text-red-600 border-0 text-xs">activo</Badge>
                   )}
                 </Link>
                 <Link
-                  href={buildUrl({ destacado: searchParams.destacado === "true" ? undefined : "true", page: "1" })}
+                  href={buildUrl({ destacado: sp.destacado === "true" ? undefined : "true", page: "1" })}
                   className={`flex items-center gap-2 text-sm px-2 py-1.5 rounded-lg transition-colors cursor-pointer ${
-                    searchParams.destacado === "true"
+                    sp.destacado === "true"
                       ? "bg-purple-50 text-[#2D1B69] font-medium"
                       : "text-gray-600 hover:bg-purple-50 hover:text-[#2D1B69]"
                   }`}
                 >
                   ⭐ Destacados
-                  {searchParams.destacado === "true" && (
+                  {sp.destacado === "true" && (
                     <Badge className="ml-auto bg-purple-100 text-[#2D1B69] border-0 text-xs">activo</Badge>
                   )}
                 </Link>
@@ -172,8 +175,8 @@ export default async function ProductosPage({ searchParams }: Props) {
               <ul className="space-y-0.5">
                 {PRICE_RANGES.map((range) => {
                   const isActive =
-                    searchParams.minPrice === String(range.min) &&
-                    (range.max === undefined || searchParams.maxPrice === String(range.max));
+                    sp.minPrice === String(range.min) &&
+                    (range.max === undefined || sp.maxPrice === String(range.max));
                   return (
                     <li key={range.label}>
                       <Link
@@ -207,17 +210,17 @@ export default async function ProductosPage({ searchParams }: Props) {
           {/* Toolbar */}
           <div className="flex items-center justify-between bg-white rounded-xl border border-gray-100 p-3 shadow-sm">
             <div className="flex items-center gap-2 flex-wrap">
-              {searchParams.categoria && (
+              {sp.categoria && (
                 <Badge variant="secondary" className="bg-purple-50 text-[#2D1B69] border-0 text-xs">
                   {activeCategory?.name} ✕
                 </Badge>
               )}
-              {searchParams.oferta === "true" && (
+              {sp.oferta === "true" && (
                 <Badge variant="secondary" className="bg-red-50 text-red-600 border-0 text-xs">
                   En oferta ✕
                 </Badge>
               )}
-              {!searchParams.categoria && searchParams.oferta !== "true" && (
+              {!sp.categoria && sp.oferta !== "true" && (
                 <span className="text-xs text-gray-500">{total} resultados</span>
               )}
             </div>
