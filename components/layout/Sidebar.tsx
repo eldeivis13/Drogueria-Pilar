@@ -32,7 +32,7 @@ const adminItems = [
   { href: "/admin/configuracion", label: "Configuración", icon: Settings },
 ];
 
-export function Sidebar() {
+export function Sidebar({ onLinkClick }: { onLinkClick?: () => void }) {
   const pathname = usePathname();
   const { data: session } = useSession();
 
@@ -43,7 +43,7 @@ export function Sidebar() {
   const initials = `${firstName[0] ?? ""}${lastName[0] ?? ""}`.toUpperCase() || "??";
 
   return (
-    <aside className="flex flex-col w-64 min-h-screen bg-gradient-to-b from-[#1A0A4A] to-[#2D1B69] text-white relative overflow-hidden">
+    <aside className="flex flex-col w-64 h-screen bg-gradient-to-b from-[#1A0A4A] to-[#2D1B69] text-white relative overflow-hidden">
       {/* Decorative circles */}
       <div className="absolute bottom-20 left-[-60px] w-48 h-48 rounded-full bg-[#4A2D9C] opacity-30" />
       <div className="absolute bottom-[-20px] left-[-20px] w-36 h-36 rounded-full bg-[#7C3AED] opacity-20" />
@@ -72,6 +72,7 @@ export function Sidebar() {
               <li key={item.href}>
                 <Link
                   href={item.href}
+                  onClick={onLinkClick}
                   className={cn(
                     "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200",
                     isActive

@@ -1,6 +1,6 @@
 "use client";
 
-import { Bell, Grid, ShoppingCart, LogOut, User, Settings } from "lucide-react";
+import { Bell, Grid, ShoppingCart, LogOut, User, Settings, Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -15,7 +15,7 @@ import { useCart } from "@/hooks/useCart";
 import Link from "next/link";
 import { SearchBar } from "@/components/layout/SearchBar";
 
-export function Navbar() {
+export function Navbar({ onMenuToggle }: { onMenuToggle?: () => void }) {
   const { data: session } = useSession();
   const { itemCount } = useCart();
 
@@ -24,7 +24,15 @@ export function Navbar() {
     : "??";
 
   return (
-    <header className="sticky top-0 z-40 flex h-16 items-center gap-4 border-b border-gray-200 bg-[#F0EEF8] px-6">
+    <header className="sticky top-0 z-40 flex h-16 items-center gap-3 border-b border-gray-200 bg-[#F0EEF8] px-4 md:px-6">
+      {/* Botón hamburguesa — solo móvil */}
+      <button
+        onClick={onMenuToggle}
+        className="lg:hidden flex items-center justify-center h-9 w-9 rounded-lg text-gray-500 hover:text-[#2D1B69] hover:bg-purple-50 transition-colors"
+      >
+        <Menu className="h-5 w-5" />
+      </button>
+
       {/* Search */}
       <SearchBar />
 
