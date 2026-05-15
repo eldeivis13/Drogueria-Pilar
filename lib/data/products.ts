@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { Prisma } from "@prisma/client";
 
 export interface ProductFilters {
   categorySlug?: string;
@@ -25,7 +26,7 @@ export async function getProducts(filters: ProductFilters = {}) {
     sort = "newest",
   } = filters;
 
-  const where: Parameters<typeof prisma.product.findMany>[0]["where"] = {
+  const where: Prisma.ProductWhereInput = {
     isActive: true,
     ...(categorySlug && {
       category: { slug: categorySlug },
@@ -43,13 +44,13 @@ export async function getProducts(filters: ProductFilters = {}) {
     ...(featured && { isFeatured: true }),
   };
 
-  const orderBy: Parameters<typeof prisma.product.findMany>[0]["orderBy"] = {
+  const orderBy: Prisma.ProductOrderByWithRelationInput = ({
     price_asc: { price: "asc" },
     price_desc: { price: "desc" },
     rating: { ratingAvg: "desc" },
     newest: { createdAt: "desc" },
     popular: { salesCount: "desc" },
-  }[sort];
+  } as Record<string, Prisma.ProductOrderByWithRelationInput>)[sort];
 
   const [items, total] = await Promise.all([
     prisma.product.findMany({

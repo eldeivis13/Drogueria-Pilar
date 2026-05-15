@@ -13,7 +13,7 @@ export default function StoreLayout({
 
       {/* Main content */}
       <div className="flex flex-1 flex-col overflow-hidden">
-        <Navbar cartCount={3} />
+        <Navbar />
         <main className="flex-1 overflow-y-auto p-6">
           {children}
         </main>

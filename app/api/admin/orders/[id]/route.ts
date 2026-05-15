@@ -4,7 +4,7 @@ import { auth } from "@/auth";
 import { OrderStatus } from "@prisma/client";
 
 const VALID_STATUSES: OrderStatus[] = [
-  "PENDING", "CONFIRMED", "PROCESSING", "SHIPPED", "DELIVERED", "CANCELLED"
+  "PENDING", "PAID", "PROCESSING", "SHIPPED", "DELIVERED", "CANCELLED", "REFUNDED"
 ];
 
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
