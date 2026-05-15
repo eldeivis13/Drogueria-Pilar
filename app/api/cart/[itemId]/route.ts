@@ -4,9 +4,10 @@ import { updateCartItem, removeFromCart } from "@/lib/data/cart";
 // PATCH /api/cart/[itemId] — actualizar cantidad
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: { itemId: string } }
+  { params }: { params: Promise<{ itemId: string }> }
 ) {
   try {
+    const { itemId } = await params;
     const body = await req.json();
     const { quantity } = body;
 
@@ -14,7 +15,7 @@ export async function PATCH(
       return NextResponse.json({ error: "quantity debe ser un número" }, { status: 400 });
     }
 
-    const result = await updateCartItem(params.itemId, quantity);
+    const result = await updateCartItem(itemId, quantity);
     return NextResponse.json(result ?? { deleted: true });
   } catch (error) {
     console.error("[PATCH /api/cart/[itemId]]", error);
@@ -25,10 +26,11 @@ export async function PATCH(
 // DELETE /api/cart/[itemId] — eliminar item
 export async function DELETE(
   _req: NextRequest,
-  { params }: { params: { itemId: string } }
+  { params }: { params: Promise<{ itemId: string }> }
 ) {
   try {
-    await removeFromCart(params.itemId);
+    const { itemId } = await params;
+    await removeFromCart(itemId);
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("[DELETE /api/cart/[itemId]]", error);

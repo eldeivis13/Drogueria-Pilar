@@ -4,11 +4,12 @@ import { prisma } from "@/lib/prisma";
 // GET /api/reviews/[productId] — reseñas aprobadas de un producto
 export async function GET(
   _req: NextRequest,
-  { params }: { params: { productId: string } }
+  { params }: { params: Promise<{ productId: string }> }
 ) {
   try {
+    const { productId } = await params;
     const reviews = await prisma.review.findMany({
-      where: { productId: params.productId, isApproved: true },
+      where: { productId, isApproved: true },
       include: {
         user: { select: { firstName: true, lastName: true, avatarUrl: true } },
       },
@@ -24,9 +25,10 @@ export async function GET(
 // POST /api/reviews/[productId] — crear reseña
 export async function POST(
   req: NextRequest,
-  { params }: { params: { productId: string } }
+  { params }: { params: Promise<{ productId: string }> }
 ) {
   try {
+    const { productId } = await params;
     const userId = req.headers.get("x-user-id") ?? "demo-user-id";
     const body = await req.json();
     const { rating, title, body: reviewBody } = body;
@@ -37,24 +39,23 @@ export async function POST(
 
     const review = await prisma.review.create({
       data: {
-        productId: params.productId,
+        productId,
         userId,
         rating,
         title,
         body: reviewBody,
-        isApproved: false, // Requiere moderación
+        isApproved: false,
       },
     });
 
-    // Recalcular rating del producto
     const agg = await prisma.review.aggregate({
-      where: { productId: params.productId, isApproved: true },
+      where: { productId, isApproved: true },
       _avg: { rating: true },
       _count: { rating: true },
     });
 
     await prisma.product.update({
-      where: { id: params.productId },
+      where: { id: productId },
       data: {
         ratingAvg: agg._avg.rating ?? 0,
         ratingCount: agg._count.rating,
