@@ -1,6 +1,6 @@
 "use client";
 
-import { Bell, Grid, ShoppingCart, LogOut, User, Settings, Menu } from "lucide-react";
+import { Bell, Heart, ShoppingCart, LogOut, User, Settings, Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -38,9 +38,12 @@ export function Navbar({ onMenuToggle }: { onMenuToggle?: () => void }) {
 
       {/* Actions */}
       <div className="flex items-center gap-2 ml-auto">
-        <Button variant="ghost" size="icon" className="h-9 w-9 text-gray-500 hover:text-[#2D1B69] hover:bg-purple-50">
-          <Grid className="h-5 w-5" />
-        </Button>
+        {/* Favoritos */}
+        <Link href="/favoritos">
+          <Button variant="ghost" size="icon" className="h-9 w-9 text-gray-500 hover:text-red-500 hover:bg-red-50">
+            <Heart className="h-5 w-5" />
+          </Button>
+        </Link>
 
         {/* Cart */}
         <Link href="/carrito">
