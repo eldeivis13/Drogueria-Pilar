@@ -11,6 +11,30 @@ import { getProductBySlug, getRelatedProducts } from "@/lib/data/products";
 import { serializeProducts } from "@/lib/serializers";
 import { formatPrice, calcDiscount } from "@/lib/format";
 import { cn } from "@/lib/utils";
+import type { Metadata } from "next";
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { slug } = await params;
+  const product = await getProductBySlug(slug);
+  if (!product) return { title: "Producto no encontrado" };
+
+  const image = product.images[0]?.url;
+  const price = Number(product.salePrice ?? product.price);
+
+  return {
+    title: product.name,
+    description: product.shortDesc ?? product.description?.slice(0, 155) ?? product.name,
+    openGraph: {
+      title: product.name,
+      description: product.shortDesc ?? product.description?.slice(0, 155) ?? "",
+      images: image ? [{ url: image, alt: product.name }] : [],
+    },
+    other: {
+      "product:price:amount": String(price),
+      "product:price:currency": "EUR",
+    },
+  };
+}
 
 const TRUST_BADGES = [
   { icon: Truck, label: "Envío a domicilio", sub: "2 horas en Bogotá" },

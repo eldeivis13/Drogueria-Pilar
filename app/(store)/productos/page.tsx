@@ -1,4 +1,10 @@
+import type { Metadata } from "next";
 import { Filter, ChevronDown } from "lucide-react";
+
+export const metadata: Metadata = {
+  title: "Productos",
+  description: "Explora nuestro catálogo completo de droguería y perfumería. Medicamentos, skincare, maquillaje, perfumes, vitaminas y más.",
+};
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
