@@ -94,12 +94,19 @@ export function ProductCard({ product, className }: ProductCardProps) {
               alt={primaryImage.altText ?? product.name}
               className="h-36 w-36 object-contain"
               onError={(e) => {
-                (e.target as HTMLImageElement).style.display = "none";
+                const img = e.target as HTMLImageElement;
+                img.style.display = "none";
+                const fallback = img.nextElementSibling as HTMLElement | null;
+                if (fallback) fallback.style.display = "block";
               }}
             />
-          ) : (
-            <span className="text-5xl">{emoji}</span>
-          )}
+          ) : null}
+          <span
+            className="text-5xl"
+            style={{ display: primaryImage ? "none" : "block" }}
+          >
+            {emoji}
+          </span>
           <div className="absolute inset-0 bg-[#2D1B69] opacity-0 group-hover:opacity-5 transition-opacity" />
         </div>
       </Link>
