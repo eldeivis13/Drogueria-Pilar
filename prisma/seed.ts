@@ -8,6 +8,30 @@ import { hash } from "bcryptjs";
 
 const prisma = new PrismaClient();
 
+// Imágenes reales de Unsplash para cada producto
+const PRODUCT_IMAGES: Record<string, string> = {
+  "crema-hidratante-neutrogena-hydro-boost":
+    "https://images.unsplash.com/photo-1611080626919-7cf5a9dbab12?w=800&q=80",
+  "perfume-carolina-herrera-good-girl-80ml":
+    "https://images.unsplash.com/photo-1541643600914-78b084683702?w=800&q=80",
+  "vitamina-c-redoxon-1000mg-30-tabletas":
+    "https://images.unsplash.com/photo-1550572017-edd951b55104?w=800&q=80",
+  "serum-vitamina-c-loreal-revitalift-30ml":
+    "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=800&q=80",
+  "base-maybelline-fit-me-matte-poreless-30ml":
+    "https://images.unsplash.com/photo-1631214524020-3c69293fbe46?w=800&q=80",
+  "ibuprofeno-bayer-400mg-20-tabletas":
+    "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=800&q=80",
+  "perfume-lancome-la-vie-est-belle-edp-100ml":
+    "https://images.unsplash.com/photo-1588776814546-ec7e7b40b5a8?w=800&q=80",
+  "crema-panelera-bepanthen-100g":
+    "https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=800&q=80",
+  "colgate-total-12-pasta-dental-150ml":
+    "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=800&q=80",
+  "omega-3-gnc-1000mg-90-capsulas":
+    "https://images.unsplash.com/photo-1607619056574-7b8d3ee536b2?w=800&q=80",
+};
+
 async function main() {
   console.log("🌱 Iniciando seed de Droguería Pilar...");
 
@@ -247,7 +271,7 @@ async function main() {
         images: {
           create: [
             {
-              url: `/images/products/${data.slug}.jpg`,
+              url: PRODUCT_IMAGES[data.slug] ?? `https://placehold.co/800x800/EEE9F8/6D28D9?text=${encodeURIComponent(data.name)}`,
               altText: data.name,
               isPrimary: true,
               sortOrder: 0,
