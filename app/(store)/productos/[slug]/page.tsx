@@ -9,6 +9,7 @@ import { Separator } from "@/components/ui/separator";
 import { ProductCard } from "@/components/products/ProductCard";
 import { AddToCartButton } from "@/components/products/AddToCartButton";
 import { ProductImage } from "@/components/products/ProductImage";
+import { ReviewForm } from "@/components/products/ReviewForm";
 import { QuantitySelector } from "@/components/products/QuantitySelector";
 import { getProductBySlug, getRelatedProducts } from "@/lib/data/products";
 import { serializeProducts } from "@/lib/serializers";
@@ -234,6 +235,12 @@ export default async function ProductDetailPage({ params }: Props) {
           </div>
         </section>
       )}
+
+      {/* Formulario de reseña */}
+      <section className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 max-w-lg">
+        <h2 className="text-lg font-bold text-gray-900 mb-5">Escribe una reseña</h2>
+        <ReviewForm productId={product.id} />
+      </section>
     </div>
   );
 }
