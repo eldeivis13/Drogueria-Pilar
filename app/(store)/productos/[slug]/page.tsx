@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { Shield, Truck, RotateCcw, ChevronRight, Star } from "lucide-react";

@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import Link from "next/link";
 import { ArrowRight, Truck, ShieldCheck, RotateCcw, Clock, Star, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
