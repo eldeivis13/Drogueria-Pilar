@@ -21,7 +21,6 @@ const mobileLinks = [
   { href: "/",          label: "Inicio",     icon: Home        },
   { href: "/productos", label: "Productos",  icon: ShoppingBag },
   { href: "/favoritos", label: "Favoritos",  icon: Heart       },
-  { href: "/carrito",   label: "Carrito",    icon: ShoppingCart },
   { href: "/cuenta",    label: "Mi cuenta",  icon: User        },
 ];
 
