@@ -38,7 +38,7 @@ async function main() {
   // ----------------------------------------------------------
   // 1. USUARIOS
   // ----------------------------------------------------------
-  const adminPassword = await hash("Admin1234!", 12);
+  const adminPassword = await hash("P1l4r$Admin#2026!", 12);
   const customerPassword = await hash("Cliente123!", 12);
 
   const admin = await prisma.user.upsert({
@@ -440,7 +440,7 @@ async function main() {
 
   console.log("\n🎉 Seed completado exitosamente.");
   console.log("─────────────────────────────────────────");
-  console.log("  Admin:    admin@drogueriapilar.com / Admin1234!");
+  console.log("  Admin:    admin@drogueriapilar.com / P1l4r$Admin#2026!");
   console.log("  Cliente:  maria@ejemplo.com / Cliente123!");
   console.log("─────────────────────────────────────────");
 }
