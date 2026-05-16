@@ -19,14 +19,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { useCart } from "@/hooks/useCart";
-
-function formatPrice(n: number) {
-  return new Intl.NumberFormat("es-ES", {
-    style: "currency",
-    currency: "EUR",
-    minimumFractionDigits: 0,
-  }).format(n);
-}
+import { formatPrice } from "@/lib/format";
 
 const PAYMENT_METHODS = [
   { id: "CREDIT_CARD", label: "Crédito", icon: "💳" },

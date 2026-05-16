@@ -13,18 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-
-// ─── helpers ────────────────────────────────────────────────
-function formatPrice(n: number) {
-  return new Intl.NumberFormat("es-ES", {
-    style: "currency", currency: "EUR", minimumFractionDigits: 2,
-  }).format(n);
-}
-function formatDate(iso: string) {
-  return new Date(iso).toLocaleDateString("es-ES", {
-    day: "2-digit", month: "long", year: "numeric",
-  });
-}
+import { formatPrice, formatDate } from "@/lib/format";
 
 const STATUS_CFG: Record<string, { label: string; color: string; icon: React.ElementType }> = {
   PENDING:    { label: "Pendiente",      color: "bg-yellow-100 text-yellow-700", icon: Clock },

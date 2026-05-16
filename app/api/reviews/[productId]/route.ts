@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { auth } from "@/auth";
 
 // GET /api/reviews/[productId] — reseñas aprobadas de un producto
 export async function GET(
@@ -22,14 +23,22 @@ export async function GET(
   }
 }
 
-// POST /api/reviews/[productId] — crear reseña
+// POST /api/reviews/[productId] — crear reseña (requiere sesión)
 export async function POST(
   req: NextRequest,
   { params }: { params: Promise<{ productId: string }> }
 ) {
   try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return NextResponse.json(
+        { error: "Debes iniciar sesión para escribir una reseña" },
+        { status: 401 }
+      );
+    }
+
     const { productId } = await params;
-    const userId = req.headers.get("x-user-id") ?? "demo-user-id";
+    const userId = session.user.id;
     const body = await req.json();
     const { rating, title, body: reviewBody } = body;
 

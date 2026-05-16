@@ -1,0 +1,187 @@
+====================================================
+  DROGUERÍA PILAR — LISTA DE PRUEBAS DE USUARIO
+====================================================
+
+URL: https://drogueriapilar.vercel.app
+
+
+── REGISTRO Y ACCESO ────────────────────────────────
+
+[ ] Registrarse con nombre, email y contraseña válidos
+    → Debe redirigir al inicio con sesión activa
+
+[ ] Intentar registrarse con un email ya existente
+    → Debe mostrar mensaje de error "Email ya en uso"
+
+[ ] Iniciar sesión con credenciales correctas
+    → Debe mostrar el nombre del usuario en el navbar
+
+[ ] Iniciar sesión con contraseña incorrecta
+    → Debe mostrar mensaje de error sin revelar si el email existe
+
+[ ] Intentar acceder a /carrito sin sesión iniciada
+    → Debe redirigir a /login automáticamente
+
+[ ] Tras iniciar sesión desde /login?callbackUrl=..., volver a la página anterior
+    → Debe redirigir a la URL de origen
+
+[ ] Cerrar sesión desde el menú de usuario
+    → Debe redirigir a /login y limpiar la sesión
+
+
+── CATÁLOGO Y BÚSQUEDA ──────────────────────────────
+
+[ ] Abrir /productos y ver el listado completo
+    → Deben aparecer productos con imagen, precio y nombre
+
+[ ] Filtrar por una categoría desde el sidebar izquierdo
+    → Solo deben mostrarse productos de esa categoría
+
+[ ] Activar el filtro "En oferta"
+    → Solo deben aparecer productos con precio rebajado
+
+[ ] Activar el filtro "Destacados"
+    → Solo deben aparecer productos marcados como destacados
+
+[ ] Filtrar por rango de precio (ej. Hasta €30)
+    → Solo deben aparecer productos dentro del rango
+
+[ ] Usar la barra de búsqueda del navbar (escribir al menos 2 letras)
+    → Deben aparecer sugerencias en tiempo real (debounce ~300ms)
+
+[ ] Seleccionar un resultado de la búsqueda
+    → Debe navegar al detalle del producto
+
+[ ] Cambiar el ordenamiento a "Menor precio"
+    → Los productos deben reordenarse de menor a mayor precio
+
+[ ] Combinar filtros: categoría + oferta + ordenamiento
+    → El resultado debe respetar todos los filtros activos
+
+[ ] Hacer clic en "Limpiar filtros"
+    → Deben desaparecer todos los filtros activos
+
+[ ] Navegar a la página 2 con la paginación
+    → Deben aparecer los siguientes productos
+
+[ ] Hacer clic en un producto
+    → Debe abrirse la página de detalle del producto
+
+
+── DETALLE DE PRODUCTO ──────────────────────────────
+
+[ ] Ver el nombre, marca, precio y descripción del producto
+    → Todos los campos deben estar correctamente mostrados
+
+[ ] Verificar que el precio de oferta se muestra tachado
+    → El precio original debe aparecer tachado junto al precio rebajado
+
+[ ] Verificar indicador de stock
+    → Verde si hay stock suficiente, naranja si queda poco, rojo si agotado
+
+[ ] Ver el breadcrumb de navegación
+    → Debe mostrar: Inicio > Productos > Categoría > Nombre del producto
+
+[ ] Ver los productos relacionados al final de la página
+    → Deben mostrarse productos de la misma categoría
+
+
+── CARRITO ──────────────────────────────────────────
+
+[ ] Añadir un producto al carrito desde el catálogo
+    → El contador del navbar debe actualizarse
+
+[ ] Añadir el mismo producto dos veces
+    → La cantidad debe incrementarse, no crear un duplicado
+
+[ ] Ir a /carrito y ver los productos añadidos
+    → Deben mostrarse nombre, precio, cantidad y subtotal
+
+[ ] Aumentar la cantidad de un producto en el carrito
+    → El subtotal y el total deben recalcularse
+
+[ ] Reducir la cantidad a 0 o eliminar un producto
+    → El producto debe desaparecer del carrito
+
+[ ] Verificar el cálculo de envío
+    → Gratis si el subtotal es >= 50 €, si no 5,99 €
+
+[ ] Vaciar el carrito completamente
+    → Debe mostrarse un mensaje de "carrito vacío"
+
+[ ] Hacer clic en "Finalizar compra" con carrito vacío
+    → No debe permitir continuar al checkout
+
+
+── CHECKOUT ─────────────────────────────────────────
+
+[ ] Acceder a /checkout con productos en el carrito
+    → Debe mostrarse el formulario de envío y el resumen del pedido
+
+[ ] Intentar confirmar el pedido sin rellenar campos obligatorios
+    → Deben aparecer mensajes de validación en los campos vacíos
+
+[ ] Rellenar todos los campos y seleccionar método de pago
+    → El botón "Confirmar pedido" debe estar habilitado
+
+[ ] Confirmar el pedido correctamente
+    → Debe mostrarse una pantalla de confirmación con el número de pedido
+
+[ ] Verificar que el carrito queda vacío tras el pedido
+    → El contador del navbar debe mostrar 0
+
+[ ] Ir a "Mis Pedidos" y encontrar el pedido recién creado
+    → Debe aparecer con estado "Pendiente"
+
+
+── MI CUENTA ────────────────────────────────────────
+
+[ ] Acceder a /cuenta con sesión iniciada
+    → Deben mostrarse los datos del perfil
+
+[ ] Editar el nombre y/o teléfono y guardar
+    → Los cambios deben persistir al recargar la página
+
+[ ] Intentar guardar con el nombre vacío
+    → Debe mostrarse un error de validación
+
+[ ] Cambiar contraseña con la contraseña actual incorrecta
+    → Debe mostrarse un error "Contraseña actual incorrecta"
+
+[ ] Cambiar contraseña con contraseñas nuevas que no coinciden
+    → Debe mostrarse un error "Las contraseñas no coinciden"
+
+[ ] Cambiar contraseña correctamente
+    → Cerrar sesión y volver a entrar con la nueva contraseña
+
+[ ] Ver el historial de pedidos
+    → Deben listarse todos los pedidos realizados con fecha y estado
+
+
+── RESPONSIVE / MÓVIL ───────────────────────────────
+
+[ ] Abrir la web en un móvil o con ancho < 1024px
+    → El sidebar debe estar oculto
+
+[ ] Tocar el botón ☰ (hamburguesa) en el navbar
+    → El sidebar debe aparecer desde la izquierda con animación
+
+[ ] Tocar el overlay oscuro fuera del sidebar
+    → El sidebar debe cerrarse
+
+[ ] Tocar un enlace dentro del sidebar en móvil
+    → Debe navegar a la página y cerrar el sidebar
+
+[ ] Verificar que el catálogo muestra 2 columnas en móvil
+    → Los productos deben caber sin desbordamiento horizontal
+
+[ ] Verificar que el detalle de producto es vertical en móvil
+    → Imagen arriba, información abajo
+
+[ ] Verificar que el checkout es usable en móvil
+    → Formulario y resumen deben ser legibles sin zoom
+
+
+====================================================
+              FIN DE PRUEBAS DE USUARIO
+====================================================

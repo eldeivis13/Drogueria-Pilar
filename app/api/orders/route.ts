@@ -82,7 +82,7 @@ export async function POST(req: NextRequest) {
       const newOrder = await tx.order.create({
         data: {
           userId,
-          orderNumber: `DP-${Date.now()}`,
+          orderNumber: `DP-${Date.now()}-${Math.random().toString(36).slice(2, 7).toUpperCase()}`,
           paymentMethod: paymentMethod as PaymentMethod,
           subtotal,
           shippingCost: shipping,

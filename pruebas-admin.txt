@@ -1,0 +1,105 @@
+====================================================
+  DROGUERÍA PILAR — LISTA DE PRUEBAS DE ADMINISTRADOR
+====================================================
+
+URL ADMIN: https://drogueriapilar.vercel.app/admin
+Credenciales de prueba: usar la cuenta con rol ADMIN
+
+
+── ACCESO Y SEGURIDAD ───────────────────────────────
+
+[ ] Iniciar sesión con cuenta ADMIN
+    → Debe aparecer la opción "Panel admin" en el menú de usuario del navbar
+
+[ ] Acceder a /admin/dashboard con cuenta ADMIN
+    → Debe cargarse el panel sin errores
+
+[ ] Intentar acceder a /admin sin sesión iniciada
+    → Debe redirigir a /login automáticamente
+
+[ ] Intentar acceder a /admin con una cuenta de cliente normal
+    → Debe redirigir al inicio (/)
+
+[ ] Intentar llamar a /api/admin/products sin autenticación (desde Postman/curl)
+    → Debe devolver 403 Forbidden
+
+
+── DASHBOARD ────────────────────────────────────────
+
+[ ] Verificar que el dashboard muestra estadísticas
+    → Deben aparecer: total de pedidos, ingresos, productos activos, usuarios
+
+[ ] Comprobar que los números son coherentes con los datos reales
+    → Comparar con los pedidos y productos existentes en la BD
+
+
+── GESTIÓN DE PRODUCTOS ─────────────────────────────
+
+[ ] Ir a /admin/productos y ver el listado
+    → Deben aparecer todos los productos (activos e inactivos)
+
+[ ] Usar el buscador del admin para filtrar por nombre
+    → Deben filtrarse los resultados en tiempo real
+
+[ ] Hacer clic en "Nuevo producto"
+    → Debe abrirse el formulario vacío
+
+[ ] Intentar crear un producto sin nombre ni precio
+    → Debe mostrar errores de validación
+
+[ ] Crear un producto completo con todos los campos
+    → Debe aparecer en el listado y en /productos del catálogo
+
+[ ] Editar un producto existente (cambiar nombre o precio)
+    → Los cambios deben reflejarse en el catálogo inmediatamente
+
+[ ] Desactivar un producto (soft delete)
+    → El producto debe desaparecer del catálogo público (/productos)
+    → El producto debe seguir visible en el panel admin (marcado como inactivo)
+
+[ ] Verificar que un producto sin stock muestra "Agotado" en el catálogo
+    → Poner stock = 0 en un producto y verificar en /productos/[slug]
+
+
+── GESTIÓN DE PEDIDOS ───────────────────────────────
+
+[ ] Ir a /admin/pedidos y ver el listado de todos los pedidos
+    → Deben aparecer todos los pedidos de todos los usuarios
+
+[ ] Filtrar pedidos por estado (ej. "Pendiente")
+    → Solo deben mostrarse pedidos con ese estado
+
+[ ] Cambiar el estado de un pedido de PENDING a PROCESSING
+    → El cambio debe persistir y verse en "Mis Pedidos" del usuario
+
+[ ] Cambiar el estado de un pedido a SHIPPED
+    → El estado debe actualizarse correctamente
+
+[ ] Cambiar el estado de un pedido a DELIVERED
+    → El estado debe marcarse como entregado
+
+[ ] Cambiar el estado de un pedido a CANCELLED
+    → El pedido debe marcarse como cancelado
+
+[ ] Verificar que el usuario ve el estado actualizado en /cuenta/pedidos
+    → Acceder con la cuenta del usuario afectado y comprobarlo
+
+
+── FLUJO COMPLETO DE ADMINISTRACIÓN ─────────────────
+
+[ ] Crear un producto nuevo → verificar en catálogo → que un usuario lo añada al carrito
+    → El producto debe estar disponible y añadible sin errores
+
+[ ] Un usuario realiza un pedido → el admin lo ve en /admin/pedidos
+    → El pedido debe aparecer con estado PENDING
+
+[ ] El admin cambia el estado del pedido a DELIVERED
+    → El usuario debe ver el estado "Entregado" en /cuenta/pedidos
+
+[ ] El admin desactiva el producto → el usuario intenta acceder a /productos/[slug]
+    → Debe mostrar 404 o redirigir al catálogo
+
+
+====================================================
+            FIN DE PRUEBAS DE ADMINISTRADOR
+====================================================

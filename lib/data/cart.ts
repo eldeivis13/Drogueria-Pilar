@@ -80,6 +80,7 @@ export function calcCartTotals(items: { quantity: number; priceSnapshot: number 
       : item.priceSnapshot.toNumber();
     return acc + price * item.quantity;
   }, 0);
-  const shipping = subtotal >= 80000 ? 0 : 8900;
+  // Envío gratis a partir de 50 EUR, si no 5.99 EUR
+  const shipping = subtotal >= 50 ? 0 : 5.99;
   return { subtotal, shipping, total: subtotal + shipping };
 }
