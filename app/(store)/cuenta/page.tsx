@@ -375,6 +375,11 @@ export default function MiCuentaPage() {
                           </span>
                           <div className="flex items-center gap-3">
                             <span className="font-bold text-gray-900">{formatPrice(Number(order.total))}</span>
+                            <Link href={`/cuenta/pedidos/${order.id}`}>
+                              <Button size="sm" variant="outline" className="rounded-xl text-xs border-[#2D1B69] text-[#2D1B69] hover:bg-purple-50 h-8">
+                                Ver detalle
+                              </Button>
+                            </Link>
                           </div>
                         </div>
                       </div>
