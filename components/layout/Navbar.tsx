@@ -28,10 +28,7 @@ export function Navbar() {
       <div className="grid grid-cols-3 items-center h-full max-w-screen-xl mx-auto">
 
         {/* IZQUIERDA — Logo + Nombre */}
-        <div className="flex items-center gap-2.5">
-          <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-[#2D1B69] to-[#7C3AED] flex items-center justify-center text-white font-bold text-sm shrink-0 shadow-md">
-            P
-          </div>
+        <div className="flex items-center">
           <div className="leading-none">
             <span className="text-[#2D1B69] font-bold text-base tracking-tight">Droguería</span>
             <span className="text-[#7C3AED] font-bold text-base tracking-tight"> Pilar</span>
