@@ -1,8 +1,12 @@
 import { Resend } from "resend";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+function getResend() {
+  return new Resend(process.env.RESEND_API_KEY);
+}
 
-const FROM = process.env.EMAIL_FROM ?? "Droguería Pilar <onboarding@resend.dev>";
+function getFrom() {
+  return process.env.EMAIL_FROM ?? "Droguería Pilar <onboarding@resend.dev>";
+}
 
 // ── Tipos ────────────────────────────────────────────────────────────────────
 
@@ -167,8 +171,8 @@ function orderConfirmationHtml(p: SendOrderConfirmationParams): string {
 
 export async function sendOrderConfirmation(params: SendOrderConfirmationParams) {
   try {
-    const { data, error } = await resend.emails.send({
-      from: FROM,
+    const { data, error } = await getResend().emails.send({
+      from: getFrom(),
       to: params.to,
       subject: `✅ Pedido confirmado — ${params.orderNumber}`,
       html: orderConfirmationHtml(params),
