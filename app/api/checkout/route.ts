@@ -5,9 +5,12 @@ import { getOrCreateCart } from "@/lib/data/cart";
 import { prisma } from "@/lib/prisma";
 import { PaymentMethod } from "@prisma/client";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
+function getStripe() {
+  return new Stripe(process.env.STRIPE_SECRET_KEY!);
+}
 
 export async function POST(req: NextRequest) {
+  const stripe = getStripe();
   try {
     const session = await auth();
     if (!session?.user?.id) {
