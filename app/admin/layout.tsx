@@ -9,6 +9,7 @@ import {
   LayoutDashboard,
   Package,
   ShoppingBag,
+  Tag,
   ChevronRight,
   LogOut,
   Store,
@@ -17,9 +18,10 @@ import {
 import { signOut } from "next-auth/react";
 
 const navItems = [
-  { href: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/admin/productos", label: "Productos", icon: Package },
-  { href: "/admin/pedidos",   label: "Pedidos",   icon: ShoppingBag },
+  { href: "/admin/dashboard",   label: "Dashboard",   icon: LayoutDashboard },
+  { href: "/admin/productos",   label: "Productos",   icon: Package         },
+  { href: "/admin/categorias",  label: "Categorías",  icon: Tag             },
+  { href: "/admin/pedidos",     label: "Pedidos",     icon: ShoppingBag     },
 ];
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
