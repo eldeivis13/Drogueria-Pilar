@@ -1,22 +1,26 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { Loader2, AlertCircle, Save } from "lucide-react";
+import {
+  Loader2, AlertCircle, Save, Upload, X, ImageIcon,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
+import Image from "next/image";
 
 interface Category { id: string; name: string; slug: string }
 
 interface ProductFormProps {
-  productId?: string; // si se pasa → modo edición
+  productId?: string;
 }
 
 export function ProductForm({ productId }: ProductFormProps) {
   const router = useRouter();
   const isEdit = !!productId;
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(isEdit);
@@ -36,7 +40,12 @@ export function ProductForm({ productId }: ProductFormProps) {
   const [isFeatured, setIsFeatured] = useState(false);
   const [requiresPrescription, setRequiresPrescription] = useState(false);
   const [isActive, setIsActive] = useState(true);
+
+  // Imagen
   const [imageUrl, setImageUrl] = useState("");
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const [dragOver, setDragOver] = useState(false);
 
   useEffect(() => {
     fetch("/api/categories")
@@ -65,6 +74,35 @@ export function ProductForm({ productId }: ProductFormProps) {
       })
       .finally(() => setLoading(false));
   }, [productId]);
+
+  async function uploadFile(file: File) {
+    setUploadError(null);
+    setUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const res = await fetch("/api/upload", { method: "POST", body: formData });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "Error al subir");
+      setImageUrl(data.url);
+    } catch (err) {
+      setUploadError(err instanceof Error ? err.message : "Error al subir la imagen");
+    } finally {
+      setUploading(false);
+    }
+  }
+
+  function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (file) uploadFile(file);
+  }
+
+  function handleDrop(e: React.DragEvent) {
+    e.preventDefault();
+    setDragOver(false);
+    const file = e.dataTransfer.files?.[0];
+    if (file) uploadFile(file);
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -209,27 +247,109 @@ export function ProductForm({ productId }: ProductFormProps) {
       </div>
 
       {/* Imagen */}
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 space-y-3">
-        <h2 className="font-semibold text-gray-800">Imagen</h2>
-        <div className="space-y-1.5">
-          <Label className={labelCls}>URL de imagen</Label>
-          <Input value={imageUrl} onChange={(e) => setImageUrl(e.target.value)} placeholder="/images/products/nombre-producto.jpg" className={inputCls} />
+      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 space-y-4">
+        <h2 className="font-semibold text-gray-800">Imagen del producto</h2>
+
+        {/* Drop zone */}
+        <div
+          onClick={() => !uploading && fileInputRef.current?.click()}
+          onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
+          onDragLeave={() => setDragOver(false)}
+          onDrop={handleDrop}
+          className={`relative border-2 border-dashed rounded-xl transition-colors cursor-pointer
+            ${dragOver ? "border-[#7C3AED] bg-purple-50" : "border-gray-200 hover:border-[#7C3AED] hover:bg-purple-50/40"}
+            ${uploading ? "pointer-events-none opacity-60" : ""}
+          `}
+        >
+          {imageUrl ? (
+            <div className="flex items-center gap-4 p-4">
+              <div className="relative h-24 w-24 rounded-xl overflow-hidden border border-gray-200 shrink-0 bg-gray-50">
+                <Image
+                  src={imageUrl}
+                  alt="Imagen del producto"
+                  fill
+                  className="object-cover"
+                  sizes="96px"
+                />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-gray-800 truncate">{imageUrl.split("/").pop()}</p>
+                <p className="text-xs text-gray-400 mt-0.5">Haz clic o arrastra para cambiar la imagen</p>
+              </div>
+              <button
+                type="button"
+                onClick={(e) => { e.stopPropagation(); setImageUrl(""); }}
+                className="h-8 w-8 rounded-lg bg-red-50 hover:bg-red-100 flex items-center justify-center text-red-500 shrink-0"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+          ) : (
+            <div className="flex flex-col items-center justify-center py-10 gap-3">
+              {uploading ? (
+                <>
+                  <Loader2 className="h-8 w-8 animate-spin text-[#7C3AED]" />
+                  <p className="text-sm text-[#7C3AED] font-medium">Subiendo imagen…</p>
+                </>
+              ) : (
+                <>
+                  <div className="h-12 w-12 rounded-xl bg-purple-50 flex items-center justify-center">
+                    <ImageIcon className="h-6 w-6 text-[#7C3AED]" />
+                  </div>
+                  <div className="text-center">
+                    <p className="text-sm font-medium text-gray-700">
+                      Arrastra una imagen o <span className="text-[#7C3AED]">haz clic para seleccionar</span>
+                    </p>
+                    <p className="text-xs text-gray-400 mt-1">PNG, JPG, WEBP · Máx. 5 MB · Se optimiza automáticamente</p>
+                  </div>
+                </>
+              )}
+            </div>
+          )}
         </div>
-        {imageUrl && (
-          <div className="h-24 w-24 rounded-xl border border-gray-200 overflow-hidden bg-gray-50">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={imageUrl} alt="Preview" className="h-full w-full object-cover" onError={(e) => (e.currentTarget.style.display = "none")} />
-          </div>
+
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          className="hidden"
+          onChange={handleFileChange}
+        />
+
+        {uploadError && (
+          <p className="flex items-center gap-1.5 text-sm text-red-600">
+            <AlertCircle className="h-4 w-4 shrink-0" /> {uploadError}
+          </p>
         )}
+
+        {/* URL manual como fallback */}
+        <div className="space-y-1.5">
+          <Label className="text-xs text-gray-400">O introduce una URL directamente</Label>
+          <Input
+            value={imageUrl}
+            onChange={(e) => setImageUrl(e.target.value)}
+            placeholder="https://ejemplo.com/imagen.jpg"
+            className="rounded-xl border-gray-200 h-9 text-sm"
+          />
+        </div>
       </div>
 
       {/* Actions */}
       <div className="flex gap-3">
-        <Button type="submit" disabled={saving} className="bg-[#7C3AED] hover:bg-[#6D28D9] text-white rounded-xl gap-2 h-10">
+        <Button
+          type="submit"
+          disabled={saving || uploading}
+          className="bg-[#7C3AED] hover:bg-[#6D28D9] text-white rounded-xl gap-2 h-10"
+        >
           {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
           {isEdit ? "Guardar cambios" : "Crear producto"}
         </Button>
-        <Button type="button" variant="outline" className="rounded-xl h-10" onClick={() => router.push("/admin/productos")}>
+        <Button
+          type="button"
+          variant="outline"
+          className="rounded-xl h-10"
+          onClick={() => router.push("/admin/productos")}
+        >
           Cancelar
         </Button>
       </div>
