@@ -127,7 +127,7 @@ export function SearchBar() {
   const showDropdown = open && query.length >= MIN_CHARS;
 
   return (
-    <div ref={containerRef} className="relative flex-1 max-w-lg">
+    <div ref={containerRef} className="relative w-full max-w-md">
       <form onSubmit={handleSubmit} className="flex items-center gap-2">
         <div className="relative flex-1">
           {/* Search icon / loader */}
