@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import {
@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { formatPrice, formatDate } from "@/lib/format";
+import { formatPrice } from "@/lib/format";
 
 interface OrderDetail {
   id: string;
@@ -38,7 +38,7 @@ interface OrderDetail {
   }[];
 }
 
-export default function CheckoutExitoPage() {
+function CheckoutExitoContent() {
   const searchParams = useSearchParams();
   const orderId = searchParams.get("orderId");
 
@@ -178,5 +178,17 @@ export default function CheckoutExitoPage() {
         </a>
       </p>
     </div>
+  );
+}
+
+export default function CheckoutExitoPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex items-center justify-center min-h-[400px]">
+        <Loader2 className="h-8 w-8 animate-spin text-[#2D1B69]" />
+      </div>
+    }>
+      <CheckoutExitoContent />
+    </Suspense>
   );
 }
