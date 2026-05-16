@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { ProductCard } from "@/components/products/ProductCard";
 import { AddToCartButton } from "@/components/products/AddToCartButton";
+import { ProductImage } from "@/components/products/ProductImage";
 import { QuantitySelector } from "@/components/products/QuantitySelector";
 import { getProductBySlug, getRelatedProducts } from "@/lib/data/products";
 import { serializeProducts } from "@/lib/serializers";
@@ -90,14 +91,10 @@ export default async function ProductDetailPage({ params }: Props) {
               </Badge>
             )}
             {primaryImage ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
+              <ProductImage
                 src={primaryImage.url}
                 alt={primaryImage.altText ?? product.name}
-                className="h-56 w-56 object-contain"
-                onError={(e) => {
-                  (e.target as HTMLImageElement).style.display = "none";
-                }}
+                emoji={emoji}
               />
             ) : (
               <span className="text-8xl">{emoji}</span>
