@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
 import { prisma } from "@/lib/prisma";
 
+export const dynamic = "force-dynamic";
+
 // Necesario para que Next.js no parsee el body (Stripe verifica la firma raw)
 export const config = { api: { bodyParser: false } };
 
