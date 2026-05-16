@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { formatPrice, calcDiscount } from "@/lib/format";
 import { AddToCartButton } from "./AddToCartButton";
+import { useWishlist } from "@/hooks/useWishlist";
 
 export interface ProductCardData {
   id: string;
@@ -52,6 +53,7 @@ export function ProductCard({ product, className }: ProductCardProps) {
   const discount = product.salePrice
     ? calcDiscount(product.price, product.salePrice)
     : null;
+  const { isFavorite, toggle } = useWishlist();
 
   return (
     <div
@@ -80,8 +82,16 @@ export function ProductCard({ product, className }: ProductCardProps) {
       )}
 
       {/* Wishlist */}
-      <button className="absolute top-3 right-3 z-10 h-7 w-7 flex items-center justify-center rounded-full bg-white/80 text-gray-400 hover:text-red-500 hover:bg-white transition-all opacity-0 group-hover:opacity-100">
-        <Heart className="h-4 w-4" />
+      <button
+        onClick={(e) => { e.preventDefault(); toggle(product.id); }}
+        className={cn(
+          "absolute top-3 right-3 z-10 h-7 w-7 flex items-center justify-center rounded-full bg-white/80 hover:bg-white transition-all",
+          isFavorite(product.id)
+            ? "opacity-100 text-red-500"
+            : "opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-500"
+        )}
+      >
+        <Heart className={cn("h-4 w-4", isFavorite(product.id) && "fill-red-500")} />
       </button>
 
       {/* Imagen */}
