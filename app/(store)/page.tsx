@@ -43,11 +43,6 @@ export default async function HomePage() {
                 Ver catálogo <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             </Link>
-            <Link href="/productos?oferta=true">
-              <Button variant="outline" className="border-white/40 text-white hover:bg-white/10 rounded-xl h-11 px-6">
-                🔥 Ver ofertas
-              </Button>
-            </Link>
           </div>
         </div>
       </section>
