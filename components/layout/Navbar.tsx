@@ -1,6 +1,6 @@
 "use client";
 
-import { Bell, Heart, ShoppingCart, LogOut, User, Settings, Menu } from "lucide-react";
+import { Heart, ShoppingCart, LogOut, User, Settings, Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -56,12 +56,6 @@ export function Navbar({ onMenuToggle }: { onMenuToggle?: () => void }) {
             )}
           </Button>
         </Link>
-
-        {/* Notifications */}
-        <Button variant="ghost" size="icon" className="relative h-9 w-9 text-gray-500 hover:text-[#2D1B69] hover:bg-purple-50">
-          <Bell className="h-5 w-5" />
-          <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-red-500" />
-        </Button>
 
         {/* User menu */}
         {session ? (
