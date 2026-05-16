@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
 import { prisma } from "@/lib/prisma";
+import { sendOrderConfirmation } from "@/lib/email";
 
 export const dynamic = "force-dynamic";
 
@@ -34,9 +35,9 @@ export async function POST(req: NextRequest) {
     }
 
     try {
-      await prisma.$transaction(async (tx) => {
+      const order = await prisma.$transaction(async (tx) => {
         // Actualizar estado del pedido y pago
-        const order = await tx.order.update({
+        const updatedOrder = await tx.order.update({
           where: { id: orderId },
           data: {
             status: "PAID",
@@ -50,11 +51,14 @@ export async function POST(req: NextRequest) {
               },
             },
           },
-          include: { items: true },
+          include: {
+            items: true,
+            user: { select: { email: true, firstName: true } },
+          },
         });
 
         // Descontar stock y actualizar ventas
-        for (const item of order.items) {
+        for (const item of updatedOrder.items) {
           await tx.product.update({
             where: { id: item.productId },
             data: {
@@ -65,13 +69,35 @@ export async function POST(req: NextRequest) {
         }
 
         // Vaciar carrito del usuario
-        const cart = await tx.cart.findUnique({ where: { userId: order.userId } });
+        const cart = await tx.cart.findUnique({ where: { userId: updatedOrder.userId } });
         if (cart) {
           await tx.cartItem.deleteMany({ where: { cartId: cart.id } });
         }
+
+        return updatedOrder;
       });
 
       console.log(`[Stripe Webhook] Pedido ${orderId} marcado como PAID`);
+
+      // Enviar email de confirmación
+      await sendOrderConfirmation({
+        to: order.user.email,
+        firstName: order.user.firstName,
+        orderNumber: order.orderNumber,
+        items: order.items.map((item) => ({
+          productName: item.productName,
+          productBrand: item.productBrand,
+          quantity: item.quantity,
+          unitPrice: Number(item.unitPrice),
+          subtotal: Number(item.subtotal),
+        })),
+        subtotal: Number(order.subtotal),
+        shippingCost: Number(order.shippingCost),
+        total: Number(order.total),
+        shippingStreet: order.shippingStreet,
+        shippingCity: order.shippingCity,
+        shippingDepartment: order.shippingDepartment,
+      });
     } catch (error) {
       console.error("[Stripe Webhook] Error procesando pago:", error);
       return NextResponse.json({ error: "Error al procesar el pago" }, { status: 500 });
